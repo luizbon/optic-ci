@@ -20,4 +20,11 @@ jobs:
         run: dotnet build ./AspireShop.CatalogService/AspireShop.CatalogService.csproj
 
       - name: Diff Optic
-        run: optic diff ./AspireShop.CatalogService/openapi.json --base main
+        run: optic diff ./AspireShop.CatalogService/openapi.json --base main --check -o optic.html
+
+      - name: Upload Optic Diff
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: optic-diff
+          path: optic.html
