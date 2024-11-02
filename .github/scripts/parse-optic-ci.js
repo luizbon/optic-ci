@@ -141,7 +141,7 @@ module.exports = ({ core, context, results }) => {
     (s) => s.warnings.length > 0
   );
 
-  if (results.completed.length > 1) {
+  if (results.completed.length > 0) {
     core.summary.addHeading("API Changes");
     const tableData = [];
     tableData.push({ data: "API", header: true });
