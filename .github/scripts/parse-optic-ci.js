@@ -103,13 +103,13 @@ function getOperationsText(groupedDiffs, options) {
     ...[...ops.added].map((o) => `- ${o} (added)`),
     ...[...ops.changed].map((o) => `- ${o} (changed)`),
     ...[...ops.removed].map((o) => `- ${o} (removed)`),
-  ].join("\n\n");
+  ].join("\n");
   return {
     operationsText: `${getOperationsChangedLabel(groupedDiffs, {
       joiner: options.labelJoiner,
     })} 
 
-    ${operationsText}
+${operationsText}
   `,
     operationsCount: ops.added.size + ops.changed.size + ops.removed.size,
   };
