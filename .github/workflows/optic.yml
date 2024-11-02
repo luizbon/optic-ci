@@ -20,7 +20,7 @@ jobs:
         run: dotnet build ./AspireShop.CatalogService/AspireShop.CatalogService.csproj
 
       - name: Diff Optic
-        run: optic diff ./AspireShop.CatalogService/openapi.json --base main --check -o optic.html
+        run: optic diff ./AspireShop.CatalogService/openapi.json --base main --check --web --out optic.html
 
       - name: Upload Optic Diff
         if: always()
