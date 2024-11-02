@@ -99,19 +99,19 @@ function getOperationsChangedLabel(groupedDiffs, opts) {
 function getOperationsText(groupedDiffs, options) {
   const ops = getOperationsChanged(groupedDiffs);
 
-  const operationsText = options.verbose
-    ? [
-        ...[...ops.added].map((o) => `\`${o}\` (added)`),
-        ...[...ops.changed].map((o) => `\`${o}\` (changed)`),
-        ...[...ops.removed].map((o) => `\`${o}\` (removed)`),
-      ].join("\n")
-    : "";
-  return `${getOperationsChangedLabel(groupedDiffs, {
-    joiner: options.labelJoiner,
-  })}
-  
+  const operationsText = [
+    ...[...ops.added].map((o) => `- ${o} (added)`),
+    ...[...ops.changed].map((o) => `- ${o} (changed)`),
+    ...[...ops.removed].map((o) => `- ${o} (removed)`),
+  ].join("\n");
+  return {
+    operationsText: `${getOperationsChangedLabel(groupedDiffs, {
+      joiner: options.labelJoiner,
+    })}  
     ${operationsText}
-  `;
+  `,
+    operationsCount: ops.added.size + ops.changed.size + ops.removed.size,
+  };
 }
 
 const getChecksLabel = (results, severity) => {
@@ -144,28 +144,33 @@ module.exports = ({ core, context, results }) => {
   if (results.completed.length > 0) {
     core.summary.addHeading("API Changes");
     const tableData = [];
-    tableData.push({ data: "API", header: true });
-    tableData.push({ data: "Changes", header: true });
-    tableData.push({ data: "Rules", header: true });
+    const headers = [];
+    headers.push({ data: "API", header: true });
+    headers.push({ data: "Changes", header: true });
+    headers.push({ data: "Rules", header: true });
     if (anyCompletedHasWarnings) {
-      tableData.push({ data: "Warnings", header: true });
+      headers.push({ data: "Warnings", header: true });
     }
+    tableData.push(headers);
     for (const completed of results.completed) {
-      tableData.push({ data: completed.apiName });
-      tableData.push({
-        data: getOperationsText(completed.comparison.groupedDiffs, {
-          verbose: true,
-          labelJoiner: ",\n",
-        }),
+      const row = [];
+      const operations = getOperationsText(completed.comparison.groupedDiffs, {
+        labelJoiner: ",\n",
       });
-      tableData.push({
+      row.push({
+        data: completed.apiName,
+        rowSpan: operations.operationsCount,
+      });
+      row.push({ data: operations.operationsText });
+      row.push({
         data: getChecksLabel(completed.comparison.results, results.severity),
       });
       if (anyCompletedHasWarnings) {
-        tableData.push({ data: completed.warnings.join("\n") });
+        row.push({ data: completed.warnings.join("\n") });
       }
+      tableData.push(row);
     }
-    core.summary.addTable([tableData]);
+    core.summary.addTable(tableData);
   }
 
   if (results.failed.length > 0) {
