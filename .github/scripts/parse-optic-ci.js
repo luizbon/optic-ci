@@ -136,82 +136,60 @@ const getChecksLabel = (results, severity) => {
     : `ℹ️ No automated checks have run`;
 };
 
-module.exports = ({ context, results }) => {
+module.exports = ({ core, context, results }) => {
   const anyCompletedHasWarnings = results.completed.some(
     (s) => s.warnings.length > 0
   );
-  return `
-    <!-- commit_sha: ${context.sha} -->
-    ${
-      results.completed.length > 0
-        ? `### APIS Changed
-            <table>
-            <thead>
-                <tr>
-                    <th>API</th>
-                    <th>Changes</th>
-                    <th>Rules</th>
-                    ${anyCompletedHasWarnings ? `<th>Warnings</th>` : ""}
-                </tr>
-            </thead>
-            <tbody>
-            ${results.completed
-              .map(
-                (s) => `<tr>
-                <td>${s.apiName}</td>
-                <td>${getOperationsText(s.comparison.groupedDiffs, {
-                  verbose: true,
-                  labelJoiner: ",\n",
-                })}
-                </td>
-                <td>${getChecksLabel(
-                  s.comparison.results,
-                  results.severity
-                )}</td>
-                ${
-                  anyCompletedHasWarnings
-                    ? `<td>${s.warnings.join("\n")}</td>`
-                    : ""
-                }
-            </tr>`
-              )
-              .join("\n")}
-            </tbody>
-            </table>`
-        : ""
-    } ${
-    results.failed.length > 0
-      ? `### Errors running optic
-        
-        <table>
-        <thead>
-        <tr>
-        <th>API</th>
-        <th>Error</th>
-        </tr>
-        </thead>
-        <tbody>
-        ${results.failed
-          .map(
-            (s) =>
-              `<tr><td>${s.apiName}</td><td>${"```"}${
-                s.error
-              }${"```"}</td></tr>`
-          )
-          .join("\n")}
-        </tbody>
-        </table>
-        `
-      : ""
+
+  if (results.completed.length > 1) {
+    core.summary.addHeading("API Changes");
+    const tableData = [];
+    tableData.push({ data: "API", header: true });
+    tableData.push({ data: "Changes", header: true });
+    tableData.push({ data: "Rules", header: true });
+    if (anyCompletedHasWarnings) {
+      tableData.push({ data: "Warnings", header: true });
+    }
+    for (const completed of results.completed) {
+      tableData.push({ data: completed.apiName });
+      tableData.push({
+        data: getOperationsText(completed.comparison.groupedDiffs, {
+          verbose: true,
+          labelJoiner: ",\n",
+        }),
+      });
+      tableData.push({
+        data: getChecksLabel(completed.comparison.results, results.severity),
+      });
+      if (anyCompletedHasWarnings) {
+        tableData.push({ data: completed.warnings.join("\n") });
+      }
+    }
+    core.summary.addTable([tableData]);
   }
 
-    Summary of API changes for commit (${context.sha})
+  if (results.failed.length > 0) {
+    core.summary.addHeading("Errors running optic");
+    const tableData = [];
+    tableData.push({ data: "API", header: true });
+    tableData.push({ data: "Error", header: true });
+    for (const failed of results.failed) {
+      tableData.push({ data: failed.apiName });
+      tableData.push({ data: failed.error });
+    }
+    core.summary.addTable([tableData]);
+  }
 
-    ${
-      results.noop.length > 0
-        ? `${
-            results.noop.length === 1 ? "1 API" : `${results.noop.length} APIs`
-          } had no changes`
-        : ""
-    }`;
+  core.summary.addHeading(
+    `Summary of API changes for commit (${context.sha})`,
+    3
+  );
+
+  if (results.noop.length > 0) {
+    if (results.completed.length === 1) {
+      core.summary.addHeading("1 API had no changes");
+    } else {
+      core.summary.addHeading(`${results.noop.length} APIs had no changes`);
+    }
+  }
 };
