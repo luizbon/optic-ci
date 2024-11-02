@@ -4,10 +4,19 @@ namespace AspireShop.CatalogService;
 
 public static class CatalogApi
 {
-    public static RouteGroupBuilder MapCatalogApi(this IEndpointRouteBuilder routes)
+    public static IEndpointRouteBuilder MapCatalogApi(this IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup("/api/v1/catalog");
+        var v1 = routes.MapGroup("/api/v1/catalog");
+        var v2 = routes.MapGroup("/api/v2/catalog");
 
+        v1.MapCatalogApi();
+        v2.MapCatalogApi();
+
+        return routes;
+    }
+
+    public static RouteGroupBuilder MapCatalogApi(this RouteGroupBuilder group)
+    {
         group.WithTags("Catalog");
 
         group.MapGet("items/type/all/brand/{catalogBrandId?}", async (int? catalogBrandId, CatalogDbContext catalogContext, int? before, int? after, int pageSize = 8) =>
@@ -16,9 +25,9 @@ public static class CatalogApi
 
             var (firstId, nextId) = itemsOnPage switch
             {
-                [] => (0, 0),
-                [var only] => (only.Id, only.Id),
-                [var first, .., var last] => (first.Id, last.Id)
+            [] => (0, 0),
+            [var only] => (only.Id, only.Id),
+            [var first, .., var last] => (first.Id, last.Id)
             };
 
             return new CatalogItemsPage(
