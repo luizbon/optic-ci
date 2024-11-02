@@ -29,7 +29,7 @@ jobs:
         if: always()
         uses: rknj/html2markdown@v1.1.0
         with:
-          html-file: optic.html
+          html-file: "./optic.html"
 
       - name: Output to Job Summary
         if: always()
