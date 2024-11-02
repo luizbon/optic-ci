@@ -22,15 +22,15 @@ jobs:
         run: dotnet build ./AspireShop.CatalogService/AspireShop.CatalogService.csproj
 
       - name: Diff Optic
-        run: optic diff ./AspireShop.CatalogService/openapi.json --base origin/main --check --web --out optic.html
+        run: optic diff ./AspireShop.CatalogService/openapi.json --base origin/main --check
+        env:
+          CI: true
 
-      - name: Convert HTML to Markdown
-        id: html2markdown
-        if: always()
-        uses: rknj/html2markdown@v1.1.0
+      - name: Parse Optic CI
+        uses: actions/github-script@v7
         with:
-          html-file: "./optic.html"
-
-      - name: Output to Job Summary
-        if: always()
-        run: echo '${{ steps.html2markdown.outputs.markdown-content }}' >> $GITHUB_STEP_SUMMARY
+          script: |
+            const script = require('./.github/scripts/parse-optic-ci.js');
+            const results = fs.readFileSync('./ci-run-details.json', 'utf8');
+            const core = require('@actions/core');
+            core.summary.addRaw(script({ context, results }));
