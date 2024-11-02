@@ -100,9 +100,9 @@ function getOperationsText(groupedDiffs, options) {
   const ops = getOperationsChanged(groupedDiffs);
 
   const operationsText = [
-    ...[...ops.added].map((o) => `- ${o} (added)`),
-    ...[...ops.changed].map((o) => `- ${o} (changed)`),
-    ...[...ops.removed].map((o) => `- ${o} (removed)`),
+    ...[...ops.added].map((o) => `- \`${o}\` (added)`),
+    ...[...ops.changed].map((o) => `- \`${o}\` (changed)`),
+    ...[...ops.removed].map((o) => `- \`${o}\` (removed)`),
   ].join("\n");
   return {
     operationsText: `${getOperationsChangedLabel(groupedDiffs, {
