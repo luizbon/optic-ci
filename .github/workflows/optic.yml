@@ -24,15 +24,13 @@ jobs:
       - name: Diff Optic
         run: optic diff ./AspireShop.CatalogService/openapi.json --base origin/main --check --web --out optic.html
 
-      - name: Output Optic Diff as Job Summary
+      - name: Convert HTML to Markdown
+        id: html2markdown
         if: always()
-        uses: actions/github-script@v6
+        uses: rknj/html2markdown@v1.1.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            if(!fs.existsSync('optic.html')) {
-              return;
-            }
-            const opticHtml = fs.readFileSync('optic.html', 'utf8');
-            github.summary.addRaw(opticHtml).write();
+          html-file: optic.html
+
+      - name: Output to Job Summary
+        if: always()
+        run: echo '${{ steps.html2markdown.outputs.markdown-content }}' >> $GITHUB_STEP_SUMMARY
