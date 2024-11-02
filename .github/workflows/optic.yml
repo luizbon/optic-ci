@@ -32,5 +32,5 @@ jobs:
           script: |
             const fs = require('fs');
             const script = require('./.github/scripts/parse-optic-ci.js');
-            const results = fs.readFileSync('./ci-run-details.json', 'utf8');
+            const results = JSON.parse(fs.readFileSync('./ci-run-details.json', 'utf8'));
             core.summary.addRaw(script({ context, results }));
