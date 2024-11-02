@@ -103,11 +103,12 @@ function getOperationsText(groupedDiffs, options) {
     ...[...ops.added].map((o) => `- ${o} (added)`),
     ...[...ops.changed].map((o) => `- ${o} (changed)`),
     ...[...ops.removed].map((o) => `- ${o} (removed)`),
-  ].join("\n");
+  ].join("\n\n");
   return {
     operationsText: `${getOperationsChangedLabel(groupedDiffs, {
       joiner: options.labelJoiner,
-    })}  
+    })} 
+
     ${operationsText}
   `,
     operationsCount: ops.added.size + ops.changed.size + ops.removed.size,
@@ -176,13 +177,17 @@ module.exports = ({ core, context, results }) => {
   if (results.failed.length > 0) {
     core.summary.addHeading("Errors running optic");
     const tableData = [];
-    tableData.push({ data: "API", header: true });
-    tableData.push({ data: "Error", header: true });
+    const headers = [];
+    headers.push({ data: "API", header: true });
+    headers.push({ data: "Error", header: true });
+    tableData.push(headers);
     for (const failed of results.failed) {
-      tableData.push({ data: failed.apiName });
-      tableData.push({ data: failed.error });
+      const row = [];
+      row.push({ data: failed.apiName });
+      row.push({ data: failed.error });
+      tableData.push(row);
     }
-    core.summary.addTable([tableData]);
+    core.summary.addTable(tableData);
   }
 
   core.summary.addHeading(
