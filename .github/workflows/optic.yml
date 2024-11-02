@@ -24,9 +24,15 @@ jobs:
       - name: Diff Optic
         run: optic diff ./AspireShop.CatalogService/openapi.json --base origin/main --check --web --out optic.html
 
-      - name: Upload Optic Diff
+      - name: Output Optic Diff as Job Summary
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/github-script@v6
         with:
-          name: optic-diff
-          path: optic.html
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            if(!fs.existsSync('optic.html')) {
+              return;
+            }
+            const opticHtml = fs.readFileSync('optic.html', 'utf8');
+            github.summary.addRaw(opticHtml).write();
