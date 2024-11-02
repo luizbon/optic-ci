@@ -24,7 +24,7 @@
 
   <Target Name="SwaggerPostBuildTarget" AfterTargets="Build">
     <Exec Command="dotnet tool restore" />
-    <Exec Command="dotnet tool run swagger tofile --output swagger.json $(TargetPath) v1" />
+    <Exec Command="dotnet tool run swagger tofile --output openapi.json $(TargetPath) v1" />
   </Target>
 
 </Project>

@@ -1,0 +1,23 @@
+# .github/workflows/optic.yml
+name: optic
+on:
+  pull_request:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Optic
+        run: npm install --location global @useoptic/optic
+
+      - name: Build API
+        run: dotnet build ./AspireShop.CatalogService/AspireShop.CatalogService.csproj
+
+      - name: Diff Optic
+        run: optic diff ./AspireShop.CatalogService/openapi.json --base main
