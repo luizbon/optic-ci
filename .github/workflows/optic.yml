@@ -1,53 +1,9 @@
-# .github/workflows/optic.yml
-name: optic
-on:
-  pull_request:
-  push:
-    branches:
-      - "main"
+on: [push]
 
 jobs:
-  run:
+  run-optic:
     runs-on: ubuntu-latest
+    name: Open API checks
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Cache npm dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-cache
-          restore-keys: |
-            ${{ runner.os }}-npm-cache
-
-      - name: Install Optic
-        run: npm install --location global @useoptic/optic
-
-      - name: Cache .NET packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
-      - name: Build API
-        run: dotnet build ./AspireShop.CatalogService/AspireShop.CatalogService.csproj
-
-      - name: Diff Optic
-        run: optic diff ./AspireShop.CatalogService/openapi.json --base origin/main --check
-        env:
-          CI: true
-
-      - name: Parse Optic CI
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const script = require('./.github/scripts/parse-optic-ci.js');
-            const results = JSON.parse(fs.readFileSync('./ci-run-details.json', 'utf8'));
-            script({ core, context, results });
-            core.summary.write();
+      - name: Optic check
+        uses: ./
