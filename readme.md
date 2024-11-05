@@ -7,10 +7,6 @@ Open API specs within the repo.
 
 ## Inputs
 
-### `compare-to`
-
-The head ref to compare against. Defaults to the current working directory.
-
 ### `compare-from`
 
 The base ref to compare against. Defaults to PR target or HEAD~1.

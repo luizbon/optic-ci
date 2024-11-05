@@ -6,7 +6,7 @@ import { initCli } from '@useoptic/optic/build/init';
 import {
   createComment,
   findCommentByTag,
-  getHeadBranch,
+  getBaseBranch,
   getInputs,
   getPrSha,
   postResultsToPRComments,
@@ -31,10 +31,8 @@ describe('utils', () => {
     it('should return the correct inputs', () => {
       jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
         switch (name) {
-          case 'compare-to':
-            return 'main';
           case 'compare-from':
-            return 'feature-branch';
+            return 'main';
           case 'match':
             return '**/*.ts';
           case 'ignore':
@@ -61,8 +59,7 @@ describe('utils', () => {
       const inputs = getInputs();
 
       expect(inputs).toEqual({
-        compareTo: 'main',
-        compareFrom: 'feature-branch',
+        compareFrom: 'main',
         match: '**/*.ts',
         ignore: '**/*.test.ts',
         standard: 'standard',
@@ -76,7 +73,6 @@ describe('utils', () => {
   describe('runDiff', () => {
     it('should call initCli and parseAsync with correct arguments when compareFrom is not provided', async () => {
       const inputs = {
-        compareTo: 'main',
         compareFrom: '',
         match: '**/*.ts',
         ignore: '**/*.test.ts',
@@ -90,12 +86,22 @@ describe('utils', () => {
         parseAsync: jest.fn()
       };
       (initCli as jest.Mock).mockResolvedValue(cliMock);
+      github.context.eventName = 'pull_request';
       github.context.payload = {
         pull_request: {
-          head: { ref: 'head-branch' },
+          base: { ref: 'base-branch' },
           number: 0
         }
       };
+
+      jest
+        .spyOn(exec, 'getExecOutput')
+        .mockImplementation(async (cmd, args) => {
+          if (cmd === 'git' && args && args.includes('base-branch')) {
+            return { exitCode: 0, stdout: 'base-branch', stderr: '' };
+          }
+          return { exitCode: 1, stdout: '', stderr: '' };
+        });
 
       await runDiff(inputs);
 
@@ -104,10 +110,8 @@ describe('utils', () => {
         [
           'diff-all',
           '--check',
-          '--compare-to',
-          'main',
           '--compare-from',
-          'head-branch',
+          'base-branch',
           '--match',
           '**/*.ts',
           '--ignore',
@@ -143,8 +147,6 @@ describe('utils', () => {
         [
           'diff-all',
           '--check',
-          '--compare-to',
-          'main',
           '--compare-from',
           'feature-branch',
           '--match',
@@ -386,23 +388,58 @@ describe('utils', () => {
     });
   });
 
-  describe('getHeadBranch', () => {
-    it('should return the head branch', () => {
+  describe('getBaseBranch', () => {
+    it('should return the base branch', async () => {
+      github.context.eventName = 'pull_request';
       github.context.payload = {
         pull_request: {
-          head: { ref: 'head-branch' },
+          base: { ref: 'base-branch' },
           number: 1
         }
       };
 
-      const result = getHeadBranch();
+      jest
+        .spyOn(exec, 'getExecOutput')
+        .mockImplementation(async (cmd, args) => {
+          if (cmd === 'git' && args && args.includes('base-branch')) {
+            return { exitCode: 0, stdout: 'base-branch', stderr: '' };
+          }
+          return { exitCode: 1, stdout: '', stderr: '' };
+        });
 
-      expect(result).toBe('head-branch');
+      const result = await getBaseBranch();
+
+      expect(result).toBe('base-branch');
     });
-    it('should return an empty string if pull_request is not defined', () => {
+
+    it('should return the origin base branch', async () => {
+      github.context.eventName = 'pull_request';
+      github.context.payload = {
+        pull_request: {
+          base: { ref: 'base-branch' },
+          number: 1
+        }
+      };
+
+      jest
+        .spyOn(exec, 'getExecOutput')
+        .mockImplementation(async (cmd, args) => {
+          if (cmd === 'git' && args && args.includes('origin/base-branch')) {
+            return { exitCode: 0, stdout: 'origin/base-branch', stderr: '' };
+          }
+          return { exitCode: 1, stdout: '', stderr: '' };
+        });
+
+      const result = await getBaseBranch();
+
+      expect(result).toBe('origin/base-branch');
+    });
+
+    it('should return an empty string if pull_request is not defined', async () => {
+      github.context.eventName = 'push';
       github.context.payload = {};
 
-      const result = getHeadBranch();
+      const result = await getBaseBranch();
 
       expect(result).toBe('');
     });
