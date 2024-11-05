@@ -34,7 +34,7 @@ export const runDiff = async (inputs: Inputs): Promise<void> => {
   if (inputs.compareFrom) {
     args.push('--compare-from', inputs.compareFrom);
   } else {
-    const headBranch = getBaseBranch();
+    const headBranch = await getBaseBranch();
     if (headBranch) {
       args.push('--compare-from', headBranch);
     }
@@ -81,10 +81,19 @@ export const getPrSha = async (): Promise<string> => {
   return '';
 };
 
-export const getBaseBranch = (): string => {
+export const getBaseBranch = async (): Promise<string> => {
   if (github.context.eventName === 'pull_request') {
     const prPayload = github.context.payload as PullRequestEvent;
-    return prPayload.pull_request.base.ref;
+    const base = prPayload.pull_request.base.ref;
+    let output = await gitOutput(['branch', '--list', base]);
+    if (output.stdout.trim()) {
+      return base;
+    }
+    const remoteBase = `origin/${base}`;
+    output = await gitOutput(['branch', '--remotes', '--list', remoteBase]);
+    if (output.stdout.trim()) {
+      return remoteBase;
+    }
   }
   return '';
 };

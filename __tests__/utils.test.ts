@@ -94,6 +94,15 @@ describe('utils', () => {
         }
       };
 
+      jest
+        .spyOn(exec, 'getExecOutput')
+        .mockImplementation(async (cmd, args) => {
+          if (cmd === 'git' && args && args.includes('base-branch')) {
+            return { exitCode: 0, stdout: 'base-branch', stderr: '' };
+          }
+          return { exitCode: 1, stdout: '', stderr: '' };
+        });
+
       await runDiff(inputs);
 
       expect(initCli).toHaveBeenCalledWith(undefined, { hideNotifier: true });
@@ -380,7 +389,7 @@ describe('utils', () => {
   });
 
   describe('getBaseBranch', () => {
-    it('should return the base branch', () => {
+    it('should return the base branch', async () => {
       github.context.eventName = 'pull_request';
       github.context.payload = {
         pull_request: {
@@ -389,15 +398,48 @@ describe('utils', () => {
         }
       };
 
-      const result = getBaseBranch();
+      jest
+        .spyOn(exec, 'getExecOutput')
+        .mockImplementation(async (cmd, args) => {
+          if (cmd === 'git' && args && args.includes('base-branch')) {
+            return { exitCode: 0, stdout: 'base-branch', stderr: '' };
+          }
+          return { exitCode: 1, stdout: '', stderr: '' };
+        });
+
+      const result = await getBaseBranch();
 
       expect(result).toBe('base-branch');
     });
-    it('should return an empty string if pull_request is not defined', () => {
+
+    it('should return the origin base branch', async () => {
+      github.context.eventName = 'pull_request';
+      github.context.payload = {
+        pull_request: {
+          base: { ref: 'base-branch' },
+          number: 1
+        }
+      };
+
+      jest
+        .spyOn(exec, 'getExecOutput')
+        .mockImplementation(async (cmd, args) => {
+          if (cmd === 'git' && args && args.includes('origin/base-branch')) {
+            return { exitCode: 0, stdout: 'origin/base-branch', stderr: '' };
+          }
+          return { exitCode: 1, stdout: '', stderr: '' };
+        });
+
+      const result = await getBaseBranch();
+
+      expect(result).toBe('origin/base-branch');
+    });
+
+    it('should return an empty string if pull_request is not defined', async () => {
       github.context.eventName = 'push';
       github.context.payload = {};
 
-      const result = getBaseBranch();
+      const result = await getBaseBranch();
 
       expect(result).toBe('');
     });
