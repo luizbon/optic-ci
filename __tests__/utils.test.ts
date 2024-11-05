@@ -90,6 +90,7 @@ describe('utils', () => {
         parseAsync: jest.fn()
       };
       (initCli as jest.Mock).mockResolvedValue(cliMock);
+      github.context.eventName = 'pull_request';
       github.context.payload = {
         pull_request: {
           head: { ref: 'head-branch' },
@@ -388,6 +389,7 @@ describe('utils', () => {
 
   describe('getHeadBranch', () => {
     it('should return the head branch', () => {
+      github.context.eventName = 'pull_request';
       github.context.payload = {
         pull_request: {
           head: { ref: 'head-branch' },
@@ -400,6 +402,7 @@ describe('utils', () => {
       expect(result).toBe('head-branch');
     });
     it('should return an empty string if pull_request is not defined', () => {
+      github.context.eventName = 'push';
       github.context.payload = {};
 
       const result = getHeadBranch();

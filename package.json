@@ -58,6 +58,7 @@
   "devDependencies": {
     "@github/local-action": "^2.1.3",
     "@jest/globals": "^29.7.0",
+    "@octokit/webhooks-definitions": "^3.67.3",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.9.0",
     "@typescript-eslint/eslint-plugin": "^8.13.0",

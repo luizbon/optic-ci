@@ -3,6 +3,7 @@ import * as exec from '@actions/exec';
 import { ExecOutput } from '@actions/exec';
 import * as github from '@actions/github';
 import { GitHub } from '@actions/github/lib/utils';
+import { PullRequestEvent } from '@octokit/webhooks-definitions/schema';
 import { COMPARE_SUMMARY_IDENTIFIER } from '@useoptic/optic/build/commands/ci/comment/common';
 import { initCli } from '@useoptic/optic/build/init';
 
@@ -86,8 +87,11 @@ export const getPrSha = async (): Promise<string> => {
 };
 
 export const getHeadBranch = (): string => {
-  if (github.context.payload.pull_request !== undefined) {
-    return github.context.payload.pull_request.head.ref as string;
+  core.info(`Event name: ${github.context.eventName}`);
+  if (github.context.eventName === 'pull_request') {
+    const prPayload = github.context.payload as PullRequestEvent;
+    core.info(`Head ref: ${JSON.stringify(prPayload)}`);
+    return prPayload.pull_request.head.ref;
   }
   return '';
 };
