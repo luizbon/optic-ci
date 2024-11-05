@@ -6,7 +6,7 @@ import { initCli } from '@useoptic/optic/build/init';
 import {
   createComment,
   findCommentByTag,
-  getHeadBranch,
+  getBaseBranch,
   getInputs,
   getPrSha,
   postResultsToPRComments,
@@ -31,10 +31,8 @@ describe('utils', () => {
     it('should return the correct inputs', () => {
       jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
         switch (name) {
-          case 'compare-to':
-            return 'main';
           case 'compare-from':
-            return 'feature-branch';
+            return 'main';
           case 'match':
             return '**/*.ts';
           case 'ignore':
@@ -61,8 +59,7 @@ describe('utils', () => {
       const inputs = getInputs();
 
       expect(inputs).toEqual({
-        compareTo: 'main',
-        compareFrom: 'feature-branch',
+        compareFrom: 'main',
         match: '**/*.ts',
         ignore: '**/*.test.ts',
         standard: 'standard',
@@ -76,7 +73,6 @@ describe('utils', () => {
   describe('runDiff', () => {
     it('should call initCli and parseAsync with correct arguments when compareFrom is not provided', async () => {
       const inputs = {
-        compareTo: 'main',
         compareFrom: '',
         match: '**/*.ts',
         ignore: '**/*.test.ts',
@@ -93,7 +89,7 @@ describe('utils', () => {
       github.context.eventName = 'pull_request';
       github.context.payload = {
         pull_request: {
-          head: { ref: 'head-branch' },
+          base: { ref: 'base-branch' },
           number: 0
         }
       };
@@ -105,10 +101,8 @@ describe('utils', () => {
         [
           'diff-all',
           '--check',
-          '--compare-to',
-          'main',
           '--compare-from',
-          'head-branch',
+          'base-branch',
           '--match',
           '**/*.ts',
           '--ignore',
@@ -144,8 +138,6 @@ describe('utils', () => {
         [
           'diff-all',
           '--check',
-          '--compare-to',
-          'main',
           '--compare-from',
           'feature-branch',
           '--match',
@@ -387,25 +379,25 @@ describe('utils', () => {
     });
   });
 
-  describe('getHeadBranch', () => {
-    it('should return the head branch', () => {
+  describe('getBaseBranch', () => {
+    it('should return the base branch', () => {
       github.context.eventName = 'pull_request';
       github.context.payload = {
         pull_request: {
-          head: { ref: 'head-branch' },
+          base: { ref: 'base-branch' },
           number: 1
         }
       };
 
-      const result = getHeadBranch();
+      const result = getBaseBranch();
 
-      expect(result).toBe('head-branch');
+      expect(result).toBe('base-branch');
     });
     it('should return an empty string if pull_request is not defined', () => {
       github.context.eventName = 'push';
       github.context.payload = {};
 
-      const result = getHeadBranch();
+      const result = getBaseBranch();
 
       expect(result).toBe('');
     });

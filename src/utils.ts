@@ -8,7 +8,6 @@ import { COMPARE_SUMMARY_IDENTIFIER } from '@useoptic/optic/build/commands/ci/co
 import { initCli } from '@useoptic/optic/build/init';
 
 export interface Inputs {
-  compareTo: string;
   compareFrom: string;
   match: string;
   ignore: string;
@@ -20,7 +19,6 @@ export interface Inputs {
 
 export const getInputs = (): Inputs => {
   return {
-    compareTo: core.getInput('compare-to'),
     compareFrom: core.getInput('compare-from'),
     match: core.getInput('match'),
     ignore: core.getInput('ignore'),
@@ -33,13 +31,10 @@ export const getInputs = (): Inputs => {
 
 export const runDiff = async (inputs: Inputs): Promise<void> => {
   const args = ['diff-all', '--check'];
-  if (inputs.compareTo) {
-    args.push('--compare-to', inputs.compareTo);
-  }
   if (inputs.compareFrom) {
     args.push('--compare-from', inputs.compareFrom);
   } else {
-    const headBranch = getHeadBranch();
+    const headBranch = getBaseBranch();
     if (headBranch) {
       args.push('--compare-from', headBranch);
     }
@@ -86,12 +81,10 @@ export const getPrSha = async (): Promise<string> => {
   return '';
 };
 
-export const getHeadBranch = (): string => {
-  core.info(`Event name: ${github.context.eventName}`);
+export const getBaseBranch = (): string => {
   if (github.context.eventName === 'pull_request') {
     const prPayload = github.context.payload as PullRequestEvent;
-    core.info(`Head ref: ${JSON.stringify(prPayload)}`);
-    return prPayload.pull_request.head.ref;
+    return prPayload.pull_request.base.ref;
   }
   return '';
 };

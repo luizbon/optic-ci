@@ -1,11 +1,6 @@
 name: Optic CI
 description: Validate open API specs with Optic
 inputs:
-  compare-to:
-    description:
-      'The head ref to compare against. Defaults to the current working
-      directory'
-    required: false
   compare-from:
     description: 'The base ref to compare against. Defaults to HEAD~1.'
     required: false
