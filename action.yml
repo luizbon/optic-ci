@@ -1,0 +1,46 @@
+name: Optic CI
+description: Validate open API specs with Optic
+inputs:
+  compare-to:
+    description:
+      'The head ref to compare against. Defaults to the current working
+      directory'
+    required: false
+  compare-from:
+    description: 'The base ref to compare against. Defaults to HEAD~1.'
+    required: false
+  match:
+    description:
+      'A glob to match specs (e.g. "**/*.yml" or "**/specifications/*.json").
+      Also takes comma separated values (e.g. "**/*.yml,**/*.json")'
+    required: false
+  ignore:
+    description:
+      'An ignore glob to ignore certain matches (e.g. "**/*.yml" or
+      "**/specifications/*.json"). Also takes comma separated values (e.g.
+      "**/*.yml,**/*.json")'
+    required: false
+  standard:
+    description:
+      'Run comparison with a locally defined standard, if not set, looks for the
+      standard on the [x-optic-standard] key in the spec and then the optic.yml
+      file'
+    required: false
+  github-token:
+    description: 'GitHub token to access the repository: comments'
+    required: false
+    default: '${{ github.token }}'
+  post-pr-comment:
+    description: 'Post a comment on the PR with the results'
+    required: false
+    default: false
+  verbose:
+    description: 'Verbose comments'
+    required: false
+    default: false
+runs:
+  using: node20
+  main: dist/index.js
+branding:
+  icon: check-circle
+  color: blue

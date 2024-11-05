@@ -1,32 +1,15 @@
-# .github/workflows/optic.yml
-name: optic
-on:
-  pull_request:
-  push:
-    branches:
-      - "main"
+name: Dry-run Optic
+
+on: [push]
 
 jobs:
-  run:
+  run-optic:
     runs-on: ubuntu-latest
+    name: Open API checks
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Install Optic
-        run: npm install --location global @useoptic/optic
-
-      - name: Build API
-        run: dotnet build ./AspireShop.CatalogService/AspireShop.CatalogService.csproj
-
-      - name: Diff Optic
-        run: optic diff ./AspireShop.CatalogService/openapi.json --base heads/main --check --web --out optic.html
-
-      - name: Upload Optic Diff
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: optic-diff
-          path: optic.html
+      - name: Optic check
+        uses: ./
