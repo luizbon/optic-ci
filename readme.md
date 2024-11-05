@@ -1,5 +1,7 @@
 # Optic CI action
 
+[![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
+
 This action runs [Optic](https://github.com/opticdev/optic) diff check on all
 Open API specs within the repo.
 
@@ -135,5 +137,6 @@ extends: ['spectral:oas', 'spectral:asyncapi', 'spectral:arazzo']
 ### Notes
 
 ## Lint only
+
 If you need only an Open API linter, use
 [Spectral Action](https://github.com/stoplightio/spectral-action) instead.

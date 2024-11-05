@@ -14,7 +14,8 @@
     "package": "npx ncc build src/index.ts -o dist --source-map --license licenses.txt",
     "package:watch": "npm run package -- --watch",
     "test": "npx jest",
-    "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package"
+    "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -66,6 +67,7 @@
     "eslint-plugin-jest": "^28.8.3",
     "eslint-plugin-jsonc": "^2.16.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "husky": "^9.1.6",
     "jest": "^29.7.0",
     "make-coverage-badge": "^1.2.0",
     "prettier": "^3.3.3",

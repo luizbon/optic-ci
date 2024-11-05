@@ -30,7 +30,7 @@ export const getInputs = (): Inputs => {
   };
 };
 
-export const runDiff = async (inputs: Inputs) => {
+export const runDiff = async (inputs: Inputs): Promise<void> => {
   const args = ['diff-all', '--check'];
   if (inputs.compareTo) {
     args.push('--compare-to', inputs.compareTo);
@@ -38,7 +38,7 @@ export const runDiff = async (inputs: Inputs) => {
   if (inputs.compareFrom) {
     args.push('--compare-from', inputs.compareFrom);
   } else {
-    const headBranch = await getHeadBranch();
+    const headBranch = getHeadBranch();
     if (headBranch) {
       args.push('--compare-from', headBranch);
     }
@@ -52,8 +52,6 @@ export const runDiff = async (inputs: Inputs) => {
   if (inputs.standard) {
     args.push('--standard', inputs.standard);
   }
-
-  core.debug(`args: ${args.join(' ')}`);
 
   const cli = await initCli(undefined, { hideNotifier: true });
   await cli.parseAsync(args, { from: 'user' });
@@ -71,9 +69,9 @@ export const getPrSha = async (): Promise<string> => {
     const output = await gitOutput(
       [
         'merge-base',
-        github.context.payload.pull_request.base.sha,
-        github.context.payload.pull_request.head.sha
-      ],
+        github.context.payload.pull_request.base.sha as string,
+        github.context.payload.pull_request.head.sha as string
+      ] as string[],
       {
         ignoreReturnCode: true
       }
@@ -81,15 +79,15 @@ export const getPrSha = async (): Promise<string> => {
     if (output.exitCode === 0) {
       return output.stdout.trim();
     } else {
-      return github.context.payload.pull_request.base.sha;
+      return github.context.payload.pull_request.base.sha as string;
     }
   }
   return '';
 };
 
-export const getHeadBranch = async (): Promise<string> => {
+export const getHeadBranch = (): string => {
   if (github.context.payload.pull_request !== undefined) {
-    return github.context.payload.pull_request.head.ref;
+    return github.context.payload.pull_request.head.ref as string;
   }
   return '';
 };
