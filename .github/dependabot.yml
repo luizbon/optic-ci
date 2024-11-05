@@ -15,11 +15,11 @@ updates:
         patterns:
           - '*'
         update-types:
-          - 'version-update:semver-minor'
-          - 'version-update:semver-patch'
+          - 'minor'
+          - 'patch'
       # Group all major updates together
       major:
         patterns:
           - '*'
         update-types:
-          - 'version-update:semver-major'
+          - 'major'
