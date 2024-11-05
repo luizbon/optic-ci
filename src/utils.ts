@@ -53,6 +53,8 @@ export const runDiff = async (inputs: Inputs) => {
     args.push('--standard', inputs.standard);
   }
 
+  core.notice(`args: ${args.join(' ')}`);
+
   const cli = await initCli(undefined, { hideNotifier: true });
   await cli.parseAsync(args, { from: 'user' });
 };
