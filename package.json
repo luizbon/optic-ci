@@ -56,7 +56,7 @@
     "@useoptic/optic": "^1.0.4"
   },
   "devDependencies": {
-    "@github/local-action": "^2.1.3",
+    "@github/local-action": "^3.1.1",
     "@jest/globals": "^29.7.0",
     "@octokit/webhooks-definitions": "^3.67.3",
     "@types/jest": "^29.5.14",
@@ -64,7 +64,7 @@
     "@typescript-eslint/eslint-plugin": "^8.13.0",
     "@typescript-eslint/parser": "^8.13.0",
     "@vercel/ncc": "^0.38.2",
-    "eslint": "^8.57.1",
+    "eslint": "^9.22.0",
     "eslint-plugin-jest": "^28.9.0",
     "eslint-plugin-jsonc": "^2.16.0",
     "eslint-plugin-prettier": "^5.2.1",
